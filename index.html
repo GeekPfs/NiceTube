@@ -82,7 +82,7 @@
 
     // Função para buscar vídeos relacionados via API do YouTube
     function fetchRelatedVideos(videoId) {
-        const apiKey = 'YOUR_API_KEY'; // Substitua pelo seu API Key
+        const apiKey = 'AIzaSyD_uzcrPz6tcSCLZBgXlMBbMxQ3TV5PCp4'; // Substitua pelo seu API Key
         fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&relatedToVideoId=${videoId}&maxResults=5&key=${apiKey}`)
             .then(response => response.json())
             .then(data => {
