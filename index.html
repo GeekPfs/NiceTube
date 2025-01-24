@@ -74,17 +74,7 @@
             `;
 
             // Fazer uma requisição para a API do YouTube e buscar vídeos relacionados
-            fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=YOUR_API_KEY`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.items.length > 0) {
-                        const videoTitle = data.items[0].snippet.title;
-                        fetchRelatedVideos(videoId);
-                    } else {
-                        alert("Vídeo não encontrado. Verifique a URL.");
-                    }
-                })
-                .catch(error => console.error('Erro ao buscar o vídeo:', error));
+            fetchRelatedVideos(videoId);
         } else {
             alert("URL inválida. Tente novamente.");
         }
@@ -93,7 +83,7 @@
     // Função para buscar vídeos relacionados via API do YouTube
     function fetchRelatedVideos(videoId) {
         const apiKey = 'YOUR_API_KEY'; // Substitua pelo seu API Key
-        fetch(`https://www.googleapis.com/youtube/v3.search?part=snippet&type=video&relatedToVideoId=${videoId}&maxResults=5&key=${apiKey}`)
+        fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&relatedToVideoId=${videoId}&maxResults=5&key=${apiKey}`)
             .then(response => response.json())
             .then(data => {
                 if (data.items.length > 0) {
