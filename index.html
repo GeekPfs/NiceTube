@@ -77,8 +77,12 @@
             fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=YOUR_API_KEY`)
                 .then(response => response.json())
                 .then(data => {
-                    const videoTitle = data.items[0].snippet.title;
-                    fetchRelatedVideos(videoId, videoTitle);
+                    if (data.items.length > 0) {
+                        const videoTitle = data.items[0].snippet.title;
+                        fetchRelatedVideos(videoId);
+                    } else {
+                        alert("Vídeo não encontrado. Verifique a URL.");
+                    }
                 })
                 .catch(error => console.error('Erro ao buscar o vídeo:', error));
         } else {
@@ -87,136 +91,21 @@
     }
 
     // Função para buscar vídeos relacionados via API do YouTube
-    function fetchRelatedVideos(videoId, videoTitle) {
+    function fetchRelatedVideos(videoId) {
         const apiKey = 'YOUR_API_KEY'; // Substitua pelo seu API Key
         fetch(`https://www.googleapis.com/youtube/v3.search?part=snippet&type=video&relatedToVideoId=${videoId}&maxResults=5&key=${apiKey}`)
             .then(response => response.json())
             .then(data => {
-                const relatedVideos = data.items;
-                displayRelatedVideos(relatedVideos);
+                if (data.items.length > 0) {
+                    displayRelatedVideos(data.items);
+                } else {
+                    document.getElementById('related-videos').innerHTML = "Nenhum vídeo relacionado encontrado.";
+                }
             })
-            .catch(error => console.error('Erro ao buscar vídeos relacionados:', error));
-    }
-
-    // Função para exibir os vídeos relacionados
-    function displayRelatedVideos(videos) {
-        const container = document.getElementById('related-videos');
-        container.innerHTML = ''; // Limpar lista atual de vídeos
-
-        videos.forEach(video => {
-            const videoItem = document.createElement('div');
-            videoItem.classList.add('video-item');
-
-            videoItem.innerHTML = `
-                <a href="https://www.youtube.com/watch?v=${video.id.videoId}" target="_blank">
-                    <img src="${video.snippet.thumbnails.medium.url}" alt="${video.snippet.title}">
-                    <p>${video.snippet.title}</p>
-                </a>
-            `;
-            container.appendChild(videoItem);
-        });
-    }
-</script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vídeo e Vídeos Relacionados</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .video-container {
-            margin: 20px auto;
-            max-width: 800px;
-        }
-        iframe {
-            width: 100%;
-            height: 450px;
-        }
-        .related-videos {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .video-item {
-            margin: 10px;
-            max-width: 200px;
-            text-align: center;
-        }
-        .video-item img {
-            width: 100%;
-            border-radius: 8px;
-        }
-    </style>
-</head>
-<body>
-
-<h1>Insira o Link do Vídeo do YouTube</h1>
-
-<!-- Formulário para inserir o link do YouTube -->
-<input type="text" id="youtube-url" placeholder="Cole a URL do YouTube aqui">
-<button onclick="loadVideo()">Carregar Vídeo</button>
-
-<div class="video-container">
-    <!-- Vídeo principal -->
-    <div id="video"></div>
-</div>
-
-<div class="related-videos" id="related-videos">
-    <!-- Vídeos relacionados vão aparecer aqui -->
-</div>
-
-<script>
-    // Função para extrair o ID do vídeo do YouTube a partir da URL
-    function extractVideoId(url) {
-        const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+|(?:v|e(?:mbed)?)\/([A-Za-z0-9_-]+))|youtu\.be\/([A-Za-z0-9_-]+))/;
-        const match = url.match(regex);
-        if (match && (match[1] || match[2])) {
-            return match[1] || match[2];
-        }
-        return null;
-    }
-
-    // Função para carregar o vídeo e vídeos relacionados
-    function loadVideo() {
-        const url = document.getElementById('youtube-url').value;
-        const videoId = extractVideoId(url);
-
-        if (videoId) {
-            // Carregar o vídeo principal
-            document.getElementById('video').innerHTML = `
-                <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            `;
-
-            // Fazer uma requisição para a API do YouTube e buscar vídeos relacionados
-            fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=YOUR_API_KEY`)
-                .then(response => response.json())
-                .then(data => {
-                    const videoTitle = data.items[0].snippet.title;
-                    fetchRelatedVideos(videoId, videoTitle);
-                })
-                .catch(error => console.error('Erro ao buscar o vídeo:', error));
-        } else {
-            alert("URL inválida. Tente novamente.");
-        }
-    }
-
-    // Função para buscar vídeos relacionados via API do YouTube
-    function fetchRelatedVideos(videoId, videoTitle) {
-        const apiKey = 'YOUR_API_KEY'; // Substitua pelo seu API Key
-        fetch(`https://www.googleapis.com/youtube/v3.search?part=snippet&type=video&relatedToVideoId=${videoId}&maxResults=5&key=${apiKey}`)
-            .then(response => response.json())
-            .then(data => {
-                const relatedVideos = data.items;
-                displayRelatedVideos(relatedVideos);
-            })
-            .catch(error => console.error('Erro ao buscar vídeos relacionados:', error));
+            .catch(error => {
+                document.getElementById('related-videos').innerHTML = "Erro ao buscar vídeos relacionados.";
+                console.error('Erro ao buscar vídeos relacionados:', error);
+            });
     }
 
     // Função para exibir os vídeos relacionados
