@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vídeos Relacionados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        iframe {
+            width: 560px;
+            height: 315px;
+            margin-top: 20px;
+        }
+        #related-videos {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .video {
+            margin: 10px;
+        }
+        .video iframe {
+            width: 200px;
+            height: 113px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vídeos Relacionados no YouTube</h1>
+    <p>Insira o código HTML de um vídeo do YouTube:</p>
+    <input type="text" id="youtubeCode" placeholder="Ex: https://www.youtube.com/watch?v=XXXXX" />
+    <button onclick="buscarVideos()">Buscar Vídeos</button>
+
+    <div id="videoPlayer"></div>
+    <div id="related-videos"></div>
+
+    <script>
+        const apiKey = 'YOUR_YOUTUBE_API_KEY';  // Substitua com sua chave da API do YouTube
+        const baseUrl = 'https://www.googleapis.com/youtube/v3/search';
+
+        function buscarVideos() {
+            const videoUrl = document.getElementById('youtubeCode').value;
+            const videoId = getVideoIdFromUrl(videoUrl);
+            
+            if (videoId) {
+                fetchRelatedVideos(videoId);
+            } else {
+                alert('Por favor, insira um URL válido do YouTube.');
+            }
+        }
+
+        function getVideoIdFromUrl(url) {
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|\S+[\?&]v=|v\/|e\/)?)([a-zA-Z0-9_-]{11})(?=\s|$)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        function fetchRelatedVideos(videoId) {
+            const url = `${baseUrl}?part=snippet&relatedToVideoId=${videoId}&type=video&key=${apiKey}&maxResults=5`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    showVideoPlayer(videoId);
+                    showRelatedVideos(data.items);
+                })
+                .catch(error => console.error('Erro ao buscar vídeos relacionados:', error));
+        }
+
+        function showVideoPlayer(videoId) {
+            const videoPlayer = document.getElementById('videoPlayer');
+            videoPlayer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        }
+
+        function showRelatedVideos(videos) {
+            const relatedVideosContainer = document.getElementById('related-videos');
+            relatedVideosContainer.innerHTML = '';
+
+            videos.forEach(video => {
+                const videoId = video.id.videoId;
+                const videoIframe = document.createElement('iframe');
+                videoIframe.src = `https://www.youtube.com/embed/${videoId}`;
+                videoIframe.frameBorder = '0';
+                videoIframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+                videoIframe.allowFullscreen = true;
+                const videoDiv = document.createElement('div');
+                videoDiv.classList.add('video');
+                videoDiv.appendChild(videoIframe);
+                relatedVideosContainer.appendChild(videoDiv);
+            });
+        }
+    </script>
+
+</body>
+</html>
